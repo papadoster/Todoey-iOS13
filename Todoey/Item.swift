@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct Item {
-    let title: String
-    let done: Bool
+class Item: Encodable {
+    var title: String = ""
+    var done: Bool = false
 }
