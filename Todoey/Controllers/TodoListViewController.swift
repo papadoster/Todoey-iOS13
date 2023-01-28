@@ -13,11 +13,12 @@ class TodoListViewController: UITableViewController {
     var itemArray = [Item]()
     
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathExtension("Items.plist")
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadItems()
+        //  loadItems()
         
     }
     
@@ -55,7 +56,7 @@ class TodoListViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { action in
             if textField.text != "" {
                 
-                let newItem = Item()
+                let newItem = Item(context: self.context)
                 newItem.title = textField.text!
                 
                 self.itemArray.append(newItem)
@@ -77,26 +78,25 @@ class TodoListViewController: UITableViewController {
     
     
     func safeData() {
-        let encoder = PropertyListEncoder()
+        
         do {
-            let data = try encoder.encode(itemArray)
-            try data.write(to: dataFilePath!)
+            try context.save()
         } catch {
-            print("error encording data array, \(error)")
+            print("error saving context, \(error)")
         }
         self.tableView.reloadData()
     }
     
-    func loadItems() {
-        if let data = try? Data(contentsOf: dataFilePath!) {
-            let decoder = PropertyListDecoder()
-            do {
-                itemArray = try decoder.decode([Item].self, from: data)
-            } catch {
-                print("Error decoding item array< \(error)")
-            }
-        }
-    }
+    //    func loadItems() {
+    //        if let data = try? Data(contentsOf: dataFilePath!) {
+    //            let decoder = PropertyListDecoder()
+    //            do {
+    //                itemArray = try decoder.decode([Item].self, from: data)
+    //            } catch {
+    //                print("Error decoding item array< \(error)")
+    //            }
+    //        }
+    //    }
     
 }
 
