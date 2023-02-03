@@ -8,6 +8,7 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
 class CategoryViewController: SwipeTableViewController {
     
@@ -19,9 +20,24 @@ class CategoryViewController: SwipeTableViewController {
         super.viewDidLoad()
         
         loadItems()
-        tableView.rowHeight = 80.0
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        guard let navBar = navigationController?.navigationBar else {fatalError("Navigation Controller does not exist")}
+        
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        
+        appearance.backgroundColor = UIColor(hexString: "1D9BF6")
+        appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor : FlatWhite()]
+        appearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : FlatWhite()]
+        navBar.standardAppearance = appearance
+        navBar.scrollEdgeAppearance = navBar.standardAppearance
+        
+        navBar.tintColor = FlatWhite()
         
     }
+    
     
     //MARK: - Table View Datasource Methods
     
@@ -32,6 +48,12 @@ class CategoryViewController: SwipeTableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = super.tableView(tableView, cellForRowAt: indexPath)
         cell.textLabel?.text = categoryArray?[indexPath.row].name ?? "No Categories Added yet"
+        
+        if let curentcolor = UIColor(hexString: categoryArray?[indexPath.row].nameOfColor ?? "1D9BF6") {
+            cell.backgroundColor = curentcolor
+            cell.textLabel?.textColor = ContrastColorOf(curentcolor, returnFlat: true)
+        }
+        
         return cell
     }
     
@@ -70,15 +92,15 @@ class CategoryViewController: SwipeTableViewController {
     }
     
     override func updateModel(at indexPath: IndexPath) {
-                    if let item = self.categoryArray?[indexPath.row] {
-                        do {
-                            try self.realm.write({
-                                self.realm.delete(item)
-                            })
-                        } catch {
-                            print("error deleting data, \(error)")
-                        }
-                    }
+        if let item = self.categoryArray?[indexPath.row] {
+            do {
+                try self.realm.write({
+                    self.realm.delete(item)
+                })
+            } catch {
+                print("error deleting data, \(error)")
+            }
+        }
     }
     
     //MARK: - Add New Categories
@@ -90,7 +112,7 @@ class CategoryViewController: SwipeTableViewController {
             if textField.text != "" {
                 let newCategory = CategoryItem()
                 newCategory.name = textField.text!
-                
+                newCategory.nameOfColor = UIColor.randomFlat().hexValue()
                 self.save(category: newCategory)
             } else {
                 return
